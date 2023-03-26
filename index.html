@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
+  <title>controller</title>
+</head>
+
+<body>
+  <div class="flex">
+    <div class="top-container">
+      <div class="left">
+        <div class="rect">L1</div>
+        <div class="rect">L2</div>
+      </div>
+      <div class="right">
+        <div class="rect">R1</div>
+        <div class="rect">R2</div>
+      </div>
+    </div>
+    <div>
+      <div class="mid-container">
+        <div class="rect2">Start</div>
+        <div class="rect2" id="home">Home</div>
+        <div class="rect2">Back</div>
+      </div>
+    </div>
+
+    <div class="bottom-container">
+      <!-- hier iets van joysticks  -->
+      <div class="circle">
+        <div class="upDown">
+          <div class="circle2">↑</div>
+          <div class="circle2">↓</div>
+        </div>
+        <div class="leftRight">
+          <div class="circle2">←</div>
+          <div class="circle2">→</div>
+        </div>
+      </div>
+      <div class="joystickPlace">
+        <div class="joystick" id="nipple1"></div>
+        <div class="joystick" id="nipple2"></div>
+      </div>
+
+      <div class="circle" id="right">
+        <div class="upDown">
+          <div class="circle2">Y</div>
+          <div class="circle2" id="a">A</div>
+        </div>
+        <div class="leftRight">
+          <div class="circle2">X</div>
+          <div class="circle2">B</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="./nipple.js"></script>
+  <script src="script.js"></script>
+</body>
+
+</html>

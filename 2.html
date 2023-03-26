@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="./style.css">
+    <script src="./nipple.js"></script>
+</head>
+
+<body>
+    <div id="wrapper">
+        <div class="button_lt btn" id="btnLT" data-code="0x136">
+            <h1>LT</h1>
+        </div>
+        <div class="button_lt2 btn" id="btnLT2" data-code="0x138">
+            <h1>LT2</h1>
+        </div>
+        <div class="pad_number text" id="pad_number">
+            <div class="text" id="padText"></div>
+        </div>
+        <div class="button_rt2 btn" id="btnRT" data-code="0x139">
+            <h1>RT2</h1>
+        </div>
+        <div class="button_rt btn" id="btnRT2" data-code="0x137">
+            <h1>RT</h1>
+        </div>
+        <div class="joystick">
+            <h1>JOYSTICK</h1>
+        </div>
+        <div class="buttons_menu_start">
+            <div class="button_select btn" id="btnSELECT" data-code="0x13a">
+                <h1>SELECT</h1>
+            </div>
+            <div class="button_start btn" id="btnSTART" data-code="0x13b">
+                <h1>START</h1>
+            </div>
+        </div>
+        <div class="buttons_right">
+            <div class="button_x btn" id="btnX" data-code="0x133">
+                <h1>X</h1>
+            </div>
+            <div class="button_y btn" id="btnY" data-code="0x134">
+                <h1>Y</h1>
+            </div>
+            <div class="button_a btn" id="btnA" data-code="0x130">
+                <h1>A</h1>
+            </div>
+            <div class="button_b btn" id="btnB" data-code="0x131">
+                <h1>B</h1>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        const generateId = () => Math.random().toString(36).substr(2, 18);
+
+        const getUserClientId = () => {
+            let localStorageId = localStorage.getItem("clientId");
+            if (localStorageId) {
+                return localStorageId;
+            } else {
+                let newId = generateId();
+                localStorage.setItem("clientId", newId);
+                return newId;
+            }
+        }
+
+        const convertToXandY = (force, radian) => {
+            let f = force >= 1 ? 1 : force;
+            const x = f * Math.cos(radian);
+            const y = f * Math.sin(radian);
+            return { x, y };
+        }
+
+        const run = async () => {
+            const id = getUserClientId();
+            let i = 0;
+
+            console.log(id);
+            let controller = {
+                thumb_stick_left: false,
+                thumb_stick_right: false,
+
+                y: false,
+                x: false,
+                b: false,
+                a: false,
+
+                start: false,
+                back: false,
+
+                guide: false,
+
+                shoulder_left: false,
+                shoulder_right: false,
+
+                // dpad
+                dpad_up: false,
+                dpad_right: false,
+                dpad_down: false,
+                dpad_left: false,
+
+                // axis
+                axis_left_x: 0,
+                axis_left_y: 0,
+
+                axis_right_x: 0,
+                axis_right_y: 0,
+
+                // triggers
+                trigger_left: 0,
+                trigger_right: 0,
+            };
+
+            const createControllerInput = (controllerInput) => {
+                return JSON.stringify({
+                    Id: id,
+                    Controller: controllerInput
+                })
+            };
+
+            let ws = new WebSocket("ws://localhost:8181/");
+            ws.onopen = function () {
+                console.log("connected");
+            };
+
+            ws.onclose = function () {
+                console.log("disconnected");
+            };
+
+            ws.onmessage = function (evt) {
+                console.log(evt.data);
+            };
+
+            let a = document.getElementById("btnA");
+            a.onmousedown = function () {
+                i++;
+                ws.send(createControllerInput({
+                    ...controller,
+                    a: true
+                }));
+            };
+            a.onpointerdown = function () {
+                i++;
+                ws.send(createControllerInput({
+                    ...controller,
+                    a: true
+                }));
+            };
+            a.onmouseup = function () {
+                i++;
+                ws.send(createControllerInput({
+                    ...controller,
+                    a: false
+                }));
+            };
+            a.onpointerup = function () {
+                i++;
+                ws.send(createControllerInput({
+                    ...controller,
+                    a: false
+                }));
+            };
+
+
+            let pad_number = document.getElementById("pad_number");
+            pad_number.onmousedown = function () {
+                ws.close();
+            };
+
+            nipplejs.create({
+                zone: document.querySelector('.joystick'),
+                mode: 'static',
+                color: 'white',
+                position: {
+                    left: '50%',
+                    top: '50%'
+                },
+                multitouch: true
+            })
+                // start end
+                .on('end', function (evt, data) {
+                    // set joystick to default position
+                    //sendEventToServer('end');
+                    // prevEvent = evt.type;
+                    // dir:up plain:up dir:left plain:left dir:down plain:down dir:right plain:right || move
+                }).on('move', function (evt, data) {
+                    console.log(data);
+                    console.log(convertToXandY(data.force, data.angle.radian));
+                    var event = null;// convertDegreeToEvent(data.angle.degree);
+
+                })
+                .on('pressure', function (evt, data) {
+                    console.log('pressure');
+                });
+
+        };
+
+        run();
+    </script>
+</body>
+
+</html>
