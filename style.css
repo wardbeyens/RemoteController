@@ -2,8 +2,9 @@ body {
   background-color: #f0f0f0;
   margin: 20px;
   font-family: Arial, Helvetica, sans-serif;
+  overflow: hidden;
 }
-.flex {
+.root {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -25,6 +26,7 @@ body {
   height: 100px;
   border-radius: 50%;
   background-color: #fff;
+  position: relative;
 }
 
 .joystickPlace {
@@ -32,6 +34,7 @@ body {
   width: 310px;
   justify-content: space-between;
   align-items: end;
+  position: static;
 }
 
 .bottom-container {
@@ -51,7 +54,8 @@ body {
 }
 
 .left,
-.right {
+.right,
+.middle {
   display: flex;
 }
 
@@ -120,4 +124,16 @@ body {
   justify-content: space-between;
   z-index: 2;
   position: absolute;
+}
+
+.box {
+  width: 100vw;
+  height: 100vh;
+  background-color: #f0f0f0;
+  position: fixed;
+  left: 0;
+  top: 0;
+
+  z-index: 1000;
+  display: none;
 }

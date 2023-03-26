@@ -1,9 +1,19 @@
-var static = nipplejs.create({
-  zone: document.getElementById("nipple1"),
-  mode: "static",
-  position: { left: "50%", top: "50%" },
-  color: "red",
-});
+let hide = () => {
+  document.getElementById("box").style.display = "none";
+};
+
+document.getElementById("menu").onclick = function () {
+  document.getElementById("box").style.display = "block";
+};
+
+document.getElementById("hide").onclick = function () {
+  document.getElementById("box").style.display = "none";
+};
+
+document.getElementById("newId").onclick = function () {
+  localStorage.setItem("clientId", generateId());
+  window.location.reload();
+};
 
 const generateId = () => Math.random().toString(36).substr(2, 18);
 
@@ -18,61 +28,64 @@ const getUserClientId = () => {
   }
 };
 
-const convertToXandY = (force, radian) => {
-  let f = force >= 1 ? 1 : force;
-  const x = f * Math.cos(radian);
-  const y = f * Math.sin(radian);
-  return { x, y };
+const id = getUserClientId();
+const shortMaxValue = 32767;
+console.log(id);
+
+let controller = {
+  thumb_stick_left: false,
+  thumb_stick_right: false,
+
+  y: false,
+  x: false,
+  b: false,
+  a: false,
+
+  start: false,
+  back: false,
+
+  guide: false,
+
+  shoulder_left: false,
+  shoulder_right: false,
+
+  // dpad
+  dpad_up: false,
+  dpad_right: false,
+  dpad_down: false,
+  dpad_left: false,
+
+  // axis
+  axis_left_x: 0,
+  axis_left_y: 0,
+
+  axis_right_x: 0,
+  axis_right_y: 0,
+
+  // triggers
+  trigger_left: 0,
+  trigger_right: 0,
 };
 
-const run = async () => {
-  const id = getUserClientId();
-  let i = 0;
+let updateController = (key, value) => {
+  controller[key] = value;
+};
 
-  console.log(id);
-  let controller = {
-    thumb_stick_left: false,
-    thumb_stick_right: false,
+const toShort = (value) => {
+  return parseInt(value * shortMaxValue);
+};
 
-    y: false,
-    x: false,
-    b: false,
-    a: false,
+const createControllerInput = (controllerInput) => {
+  return JSON.stringify({
+    Id: id,
+    Controller: controllerInput,
+  });
+};
 
-    start: false,
-    back: false,
+var inputBooleanList = document.querySelectorAll(".inputBool");
 
-    guide: false,
-
-    shoulder_left: false,
-    shoulder_right: false,
-
-    // dpad
-    dpad_up: false,
-    dpad_right: false,
-    dpad_down: false,
-    dpad_left: false,
-
-    // axis
-    axis_left_x: 0,
-    axis_left_y: 0,
-
-    axis_right_x: 0,
-    axis_right_y: 0,
-
-    // triggers
-    trigger_left: 0,
-    trigger_right: 0,
-  };
-
-  const createControllerInput = (controllerInput) => {
-    return JSON.stringify({
-      Id: id,
-      Controller: controllerInput,
-    });
-  };
-
-  let ws = new WebSocket("ws://localhost:8181/");
+const connectAndRun = (ip) => {
+  let ws = new WebSocket(`ws://${ip}:8181/`);
   ws.onopen = function () {
     console.log("connected");
   };
@@ -85,75 +98,71 @@ const run = async () => {
     console.log(evt.data);
   };
 
-  let a = document.getElementById("a");
-  a.onmousedown = function () {
-    i++;
-    ws.send(
-      createControllerInput({
-        ...controller,
-        a: true,
-      })
-    );
-  };
-  a.onpointerdown = function () {
-    i++;
-    ws.send(
-      createControllerInput({
-        ...controller,
-        a: true,
-      })
-    );
-  };
-  a.onmouseup = function () {
-    i++;
-    ws.send(
-      createControllerInput({
-        ...controller,
-        a: false,
-      })
-    );
-  };
-  a.onpointerup = function () {
-    i++;
-    ws.send(
-      createControllerInput({
-        ...controller,
-        a: false,
-      })
-    );
+  inputBooleanList.forEach((input) => {
+    let key = input.dataset.key || null;
+    input.onpointerdown = function () {
+      updateController(key, true);
+
+      let inputString = createControllerInput(controller);
+      ws.send(inputString);
+    };
+
+    input.onpointerup = function () {
+      updateController(key, false);
+
+      let inputString = createControllerInput(controller);
+      ws.send(inputString);
+    };
+  });
+
+  //end
+
+  var nippleLeft = document.getElementById("nipple1");
+  var nippleRight = document.getElementById("nipple2");
+
+  var options = {
+    color: "red",
+    mode: "static",
+    position: { left: "50%", top: "50%" },
   };
 
-  let pad_number = document.getElementById("home");
-  pad_number.onmousedown = function () {
-    ws.close();
-  };
-
-  nipplejs
-    .create({
-      zone: document.querySelector(".joystick"),
-      mode: "static",
-      color: "red",
-      position: {
-        left: "50%",
-        top: "50%",
-      },
-      multitouch: true,
-    })
-    // start end
+  var manager1 = nipplejs.create({ ...options, zone: nippleLeft });
+  manager1
     .on("end", function (evt, data) {
-      // set joystick to default position
-      //sendEventToServer('end');
-      // prevEvent = evt.type;
-      // dir:up plain:up dir:left plain:left dir:down plain:down dir:right plain:right || move
+      updateController("axis_left_x", 0);
+      updateController("axis_left_y", 0);
+      ws.send(createControllerInput(controller));
     })
     .on("move", function (evt, data) {
-      console.log(data);
-      console.log(convertToXandY(data.force, data.angle.radian));
-      var event = null; // convertDegreeToEvent(data.angle.degree);
+      updateController("axis_left_x", toShort(data.vector.x));
+      updateController("axis_left_y", toShort(data.vector.y));
+      ws.send(createControllerInput(controller));
+    });
+
+  var manager2 = nipplejs.create({ ...options, zone: nippleRight });
+  manager2
+    .on("end", function (evt, data) {
+      updateController("axis_right_x", 0);
+      updateController("axis_right_y", 0);
+      ws.send(createControllerInput(controller));
     })
-    .on("pressure", function (evt, data) {
-      console.log("pressure");
+    .on("move", function (evt, data) {
+      updateController("axis_right_x", toShort(data.vector.x));
+      updateController("axis_right_y", toShort(data.vector.y));
+      ws.send(createControllerInput(controller));
     });
 };
 
-run();
+let ipInput = document.getElementById("ip");
+
+document.getElementById("saveIp").onclick = function () {
+  let ip = ipInput.value;
+  localStorage.setItem("ip", ip);
+  connectAndRun(ip);
+  hide();
+};
+
+let ip = localStorage.getItem("ip");
+if (ip) {
+  ipInput.value = ip;
+}
