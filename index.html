@@ -9,26 +9,26 @@
   <title>Remote Controller</title>
 </head>
 
-<body>
+<body oncontextmenu="return false;">
   <div class="root">
     <div class="top-container">
       <div class="left">
-        <div class="rect inputBool" data-key="shoulder_left">L1</div>
-        <div class="rect">L2</div>
+        <button class="rect inputTrigger" data-key="trigger_left">L2</button>
+        <button class="rect inputBool" data-key="shoulder_left">L1</button>
       </div>
       <div class="middle">
-        <div class="rect" id="menu">menu</div>
+        <button class="rect" id="menu">menu</button>
       </div>
       <div class="right">
-        <div class="rect inputBool" data-key="shoulder_right">R1</div>
-        <div class="rect">R2</div>
+        <button class="rect inputBool" data-key="shoulder_right">R1</button>
+        <button class="rect inputTrigger" data-key="trigger_right">R2</button>
       </div>
     </div>
     <div>
       <div class="mid-container">
-        <div class="rect2 inputBool" data-key="start">Start</div>
-        <div class="rect2 inputBool" data-key="guide">Home</div>
-        <div class="rect2 inputBool" data-key="back">Back</div>
+        <button class="rect2 inputBool" data-key="start">Start</button>
+        <button class="rect2 inputBool" data-key="guide">Home</button>
+        <button class="rect2 inputBool" data-key="back">Back</button>
       </div>
     </div>
 
@@ -36,12 +36,12 @@
       <!-- hier iets van joysticks  -->
       <div class="circle">
         <div class="upDown">
-          <div class="circle2  inputBool" data-key="dpad_up">↑</div>
-          <div class="circle2 inputBool" data-key="dpad_down">↓</div>
+          <button class="circle2 inputBool" data-key="dpad_up">↑</button>
+          <button class="circle2 inputBool" data-key="dpad_down">↓</button>
         </div>
         <div class="leftRight">
-          <div class="circle2 inputBool" data-key="dpad_left">←</div>
-          <div class="circle2 inputBool" data-key="dpad_right">→</div>
+          <button class="circle2 inputBool" data-key="dpad_left">←</button>
+          <button class="circle2 inputBool" data-key="dpad_right">→</button>
         </div>
       </div>
       <div class="joystickPlace">
@@ -51,12 +51,12 @@
 
       <div class="circle" id="right">
         <div class="upDown">
-          <div class="circle2 inputBool" data-key="y">Y</div>
-          <div class="circle2 inputBool" data-key="a">A</div>
+          <button class="circle2 inputBool" data-key="y">Y</button>
+          <button class="circle2 inputBool" data-key="a">A</button>
         </div>
         <div class="leftRight">
-          <div class="circle2 inputBool" data-key="x">X</div>
-          <div class="circle2 inputBool" data-key="b">B</div>
+          <button class="circle2 inputBool" data-key="x">X</button>
+          <button class="circle2 inputBool" data-key="b">B</button>
         </div>
       </div>
     </div>
@@ -69,6 +69,20 @@
   </div>
   <script src="./nipple-latest.js"></script>
 
+  <script>
+    addEventListener("click", function () {
+      var
+        el = document.documentElement
+        , rfs =
+          el.requestFullScreen
+          || el.webkitRequestFullScreen
+          || el.mozRequestFullScreen
+        ;
+      rfs.call(el);
+
+      screen.orientation.lock("landscape");
+    });
+  </script>
   <script src="script.js" defer></script>
 </body>
 

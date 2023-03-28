@@ -1,3 +1,15 @@
+var nippleLeft = document.getElementById("nipple1");
+var nippleRight = document.getElementById("nipple2");
+
+var options = {
+  color: "red",
+  mode: "static",
+  position: { left: "50%", top: "50%" },
+};
+
+var manager1 = nipplejs.create({ ...options, zone: nippleLeft });
+var manager2 = nipplejs.create({ ...options, zone: nippleRight });
+
 let hide = () => {
   document.getElementById("box").style.display = "none";
 };
@@ -32,7 +44,7 @@ const id = getUserClientId();
 const shortMaxValue = 32767;
 console.log(id);
 
-let controller = {
+var controller = {
   thumb_stick_left: false,
   thumb_stick_right: false,
 
@@ -67,8 +79,11 @@ let controller = {
   trigger_right: 0,
 };
 
+var ws = null;
+
 let updateController = (key, value) => {
   controller[key] = value;
+  // console.table(controller);
 };
 
 const toShort = (value) => {
@@ -83,9 +98,15 @@ const createControllerInput = (controllerInput) => {
 };
 
 var inputBooleanList = document.querySelectorAll(".inputBool");
+var inputTriggerList = document.querySelectorAll(".inputTrigger");
+
+const checkAndSend = () => {
+  console.log(ws.readyState);
+  ws.readyState === 1 && ws.send(createControllerInput(controller));
+};
 
 const connectAndRun = (ip) => {
-  let ws = new WebSocket(`ws://${ip}:8181/`);
+  ws = new WebSocket(`ws://${ip}:8181/`);
   ws.onopen = function () {
     console.log("connected");
   };
@@ -102,54 +123,54 @@ const connectAndRun = (ip) => {
     let key = input.dataset.key || null;
     input.onpointerdown = function () {
       updateController(key, true);
-
-      let inputString = createControllerInput(controller);
-      ws.send(inputString);
+      checkAndSend();
     };
 
     input.onpointerup = function () {
       updateController(key, false);
+      checkAndSend();
+    };
+  });
 
-      let inputString = createControllerInput(controller);
-      ws.send(inputString);
+  inputTriggerList.forEach((input) => {
+    let key = input.dataset.key || null;
+    input.onpointerdown = function () {
+      updateController(key, 255);
+
+      checkAndSend();
+    };
+
+    input.onpointerup = function () {
+      updateController(key, 0);
+      checkAndSend();
     };
   });
 
   //end
 
-  var nippleLeft = document.getElementById("nipple1");
-  var nippleRight = document.getElementById("nipple2");
-
-  var options = {
-    color: "red",
-    mode: "static",
-    position: { left: "50%", top: "50%" },
-  };
-
-  var manager1 = nipplejs.create({ ...options, zone: nippleLeft });
   manager1
     .on("end", function (evt, data) {
+      console.log(evt, data);
       updateController("axis_left_x", 0);
       updateController("axis_left_y", 0);
-      ws.send(createControllerInput(controller));
+      checkAndSend();
     })
     .on("move", function (evt, data) {
       updateController("axis_left_x", toShort(data.vector.x));
       updateController("axis_left_y", toShort(data.vector.y));
-      ws.send(createControllerInput(controller));
+      checkAndSend();
     });
 
-  var manager2 = nipplejs.create({ ...options, zone: nippleRight });
   manager2
     .on("end", function (evt, data) {
       updateController("axis_right_x", 0);
       updateController("axis_right_y", 0);
-      ws.send(createControllerInput(controller));
+      checkAndSend();
     })
     .on("move", function (evt, data) {
       updateController("axis_right_x", toShort(data.vector.x));
       updateController("axis_right_y", toShort(data.vector.y));
-      ws.send(createControllerInput(controller));
+      checkAndSend();
     });
 };
 
