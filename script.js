@@ -23,24 +23,28 @@ document.getElementById("hide").onclick = function () {
 };
 
 document.getElementById("newId").onclick = function () {
-  localStorage.setItem("clientId", generateId());
-  window.location.reload();
+  newId();
+  //window.location.reload();
 };
-
-const generateId = () => Math.random().toString(36).substr(2, 18);
 
 const getUserClientId = () => {
   let localStorageId = localStorage.getItem("clientId");
+
   if (localStorageId) {
     return localStorageId;
   } else {
-    let newId = generateId();
-    localStorage.setItem("clientId", newId);
-    return newId;
+    return newId();
   }
 };
+let id = getUserClientId();
+const generateId = () => Math.random().toString(36).substr(2, 18);
+const newId = () => {
+  let newId = generateId();
+  localStorage.setItem("clientId", newId);
+  id = newId;
+  return newId;
+};
 
-const id = getUserClientId();
 const shortMaxValue = 32767;
 console.log(id);
 
@@ -101,7 +105,6 @@ var inputBooleanList = document.querySelectorAll(".inputBool");
 var inputTriggerList = document.querySelectorAll(".inputTrigger");
 
 const checkAndSend = () => {
-  console.log(ws.readyState);
   ws.readyState === 1 && ws.send(createControllerInput(controller));
 };
 
