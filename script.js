@@ -23,24 +23,30 @@ document.getElementById("hide").onclick = function () {
 };
 
 document.getElementById("newId").onclick = function () {
-  localStorage.setItem("clientId", generateId());
-  window.location.reload();
+  newId();
+  //window.location.reload();
 };
-
+let id = null;
 const generateId = () => Math.random().toString(36).substr(2, 18);
+const newId = () => {
+  let newId = generateId();
+  localStorage.setItem("clientId", newId);
+  id = newId;
+  return newId;
+};
 
 const getUserClientId = () => {
   let localStorageId = localStorage.getItem("clientId");
+
   if (localStorageId) {
     return localStorageId;
   } else {
-    let newId = generateId();
-    localStorage.setItem("clientId", newId);
-    return newId;
+    return newId();
   }
 };
 
-const id = getUserClientId();
+id = getUserClientId();
+
 const shortMaxValue = 32767;
 console.log(id);
 
@@ -101,7 +107,6 @@ var inputBooleanList = document.querySelectorAll(".inputBool");
 var inputTriggerList = document.querySelectorAll(".inputTrigger");
 
 const checkAndSend = () => {
-  console.log(ws.readyState);
   ws.readyState === 1 && ws.send(createControllerInput(controller));
 };
 
@@ -150,7 +155,6 @@ const connectAndRun = (ip) => {
 
   manager1
     .on("end", function (evt, data) {
-      console.log(evt, data);
       updateController("axis_left_x", 0);
       updateController("axis_left_y", 0);
       checkAndSend();
@@ -187,3 +191,14 @@ let ip = localStorage.getItem("ip");
 if (ip) {
   ipInput.value = ip;
 }
+
+document.getElementById("disconnect").onclick = function () {
+  if (ws) {
+    let disconnectInput = {
+      Id: id,
+      State: "disconnect",
+    };
+    ws.send(JSON.stringify(disconnectInput));
+    id = newId();
+  }
+};
